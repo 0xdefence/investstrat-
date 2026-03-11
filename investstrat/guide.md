@@ -12,7 +12,7 @@ Note: This can be done in any programming language of your choosing.
 
 Languages to be used: 
 Python
-LibSQL 
+PostGreSQL 
 
 APIs: 
 CoinGecko 
