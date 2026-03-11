@@ -1,0 +1,1 @@
+# Python Script to Automate 30 Day Moving Avg for BTC Prices from CoinGecko API
