@@ -7,6 +7,7 @@ A Python + PostgreSQL trading-signal prototype that:
 - Computes a simple moving average
 - Generates a basic LONG/SHORT signal
 - Logs prices and signals to PostgreSQL
+- Simulates Hyperliquid demo order placement for each generated signal
 
 The current implementation is designed around a 4-hour runtime window with polling every 15 minutes.
 
@@ -22,6 +23,7 @@ The current implementation is designed around a 4-hour runtime window with polli
      - `LONG` if current price > moving average
      - `SHORT` otherwise
    - Logs result to `live_btc_prices`
+   - Calls demo order placement in `hyperliquid_order.py`
    - Prints log line in this format:
 
 ```text
@@ -33,6 +35,7 @@ TIMESTAMP | LONG OR SHORT | PRICE VALUE | MOVING AVG VALUE
 - Python
 - PostgreSQL
 - CoinGecko API
+- Hyperliquid order simulator (demo mode)
 
 ## Project Structure
 
@@ -40,7 +43,9 @@ TIMESTAMP | LONG OR SHORT | PRICE VALUE | MOVING AVG VALUE
 - `api.py`: CoinGecko API calls for historical and live prices
 - `signals.py`: Moving-average calculation + signal generation
 - `db.py`: PostgreSQL connection + inserts/table creation
+- `hyperliquid_order.py`: Demo order placement function used after each signal
 - `db.sql`: SQL table schema reference
+- `requirements.txt`: Python dependency manifest
 - `.env.example`: Environment variable template
 - `guide.md`: Original assignment/spec
 
@@ -62,7 +67,7 @@ source .venv/bin/activate
 ### 2. Install dependencies
 
 ```bash
-pip install requests python-dotenv psycopg2-binary
+pip install -r requirements.txt
 ```
 
 ### 3. Configure environment variables
@@ -96,19 +101,24 @@ Tables:
 ## Run
 
 ```bash
-python main.py
+python3 main.py
 ```
 
 Expected behavior:
 
 - Backfills recent historical prices
 - Logs one signal every 15 minutes
+- Prints demo order details for each generated signal
 - Runs for ~4 hours total (16 iterations)
 
 Example output:
 
 ```text
 2026-03-11 10:15:00.123456 | LONG | 84250.11 | 83620.44
+DEBUG: about to call place_order with signal=LONG
+placed order called with signal: LONG, coin: BTC, size: 0.01
+Placing order: {'coin': 'BTC', 'size': 0.01, 'side': 'long'}
+Demo order result: order_id=12345, status=success
 ```
 
 ## Notes About Current Implementation
@@ -116,6 +126,7 @@ Example output:
 - `api.py` currently hardcodes historical `days` to `91` and returns the last 30 data points from that response.
 - The moving average is calculated from the in-memory historical list fetched at startup.
 - Historical backfill is inserted each run and may create duplicate dates unless deduplicated at DB level.
+- Hyperliquid integration is demo-only right now and does not submit live orders.
 
 ## Troubleshooting
 
@@ -130,7 +141,7 @@ Example output:
 
 - Missing Python modules:
   - Ensure virtual environment is active.
-  - Re-run dependency installation.
+  - Re-run `pip install -r requirements.txt`.
 
 ## Security
 
@@ -139,8 +150,8 @@ Example output:
 
 ## Future Improvements
 
-- Add `requirements.txt` and pinned versions.
 - Add unique constraints for historical rows.
 - Refresh moving average with live appended data.
 - Add unit tests for signal and API layers.
 - Add structured logging and metrics.
+- Add real Hyperliquid API integration behind a feature flag.

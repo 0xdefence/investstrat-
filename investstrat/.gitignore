@@ -1,1 +1,24 @@
 .env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Local tooling
+.DS_Store
+.vscode/*.code-workspace
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
